@@ -36,11 +36,25 @@ type SimpleChaincode struct {
 var marbleIndexStr = "_marbleindex"				//name for the key/value that will store a list of all known marbles
 var openTradesStr = "_opentrades"				//name for the key/value that will store all open trades
 
+var productIndexStr = "_productindex"				//name for the key/value that will store a list of all known products
+
 type Marble struct{
 	Name string `json:"name"`					//the fieldtags are needed to keep case from bouncing around
 	Color string `json:"color"`
 	Size int `json:"size"`
 	User string `json:"user"`
+}
+
+type Product struct{
+	UID string `json:"uid"`
+	Name string `json:"name"`					//the fieldtags are needed to keep case from bouncing around
+	Description string `json:"desc"`
+	Status int `json:"status"`
+	Point string `json:"point"`
+	Route string `json:"route"`
+	Manufacture_Date string `json:"mfg_date"`
+	Manufacture_Location string `json:"mfg_loc"`
+	QR_Code string `json:"qr_code"`
 }
 
 // ============================================================================================================================
@@ -56,7 +70,7 @@ func main() {
 // ============================================================================================================================
 // Init - reset all the things
 // ============================================================================================================================
-func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var Aval int
 	var err error
 
@@ -83,13 +97,20 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, function string, args [
 		return nil, err
 	}
 
+	var emptyProduct []string
+	productJsonAsBytes, _ := json.Marshal(emptyProduct)								//marshal an emtpy array of strings to clear the index
+	err = stub.PutState(productIndexStr, productJsonAsBytes)
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 
 // ============================================================================================================================
 // Run - Our entry point for Invocations - [LEGACY] obc-peer 4/25/2016
 // ============================================================================================================================
-func (t *SimpleChaincode) Run(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *SimpleChaincode) Run(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	fmt.Println("run is running " + function)
 	return t.Invoke(stub, function, args)
 }
@@ -97,7 +118,7 @@ func (t *SimpleChaincode) Run(stub *shim.ChaincodeStub, function string, args []
 // ============================================================================================================================
 // Invoke - Our entry point for Invocations
 // ============================================================================================================================
-func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	fmt.Println("invoke is running " + function)
 
 	// Handle different functions
@@ -109,6 +130,8 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 		return t.Write(stub, args)
 	} else if function == "init_marble" {									//create a new marble
 		return t.init_marble(stub, args)
+	} else if function == "init_product" {									//create a new product
+		return t.init_product(stub, args)
 	} else if function == "set_user" {										//change owner of a marble
 		return t.set_user(stub, args)
 	}
@@ -120,7 +143,7 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 // ============================================================================================================================
 // Query - Our entry point for Queries
 // ============================================================================================================================
-func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	fmt.Println("query is running " + function)
 
 	// Handle different functions
@@ -135,7 +158,7 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, function string, args 
 // ============================================================================================================================
 // Read - read a variable from chaincode state
 // ============================================================================================================================
-func (t *SimpleChaincode) read(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var name, jsonResp string
 	var err error
 
@@ -156,7 +179,7 @@ func (t *SimpleChaincode) read(stub *shim.ChaincodeStub, args []string) ([]byte,
 // ============================================================================================================================
 // Delete - remove a key/value pair from state
 // ============================================================================================================================
-func (t *SimpleChaincode) Delete(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+func (t *SimpleChaincode) Delete(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
@@ -195,7 +218,7 @@ func (t *SimpleChaincode) Delete(stub *shim.ChaincodeStub, args []string) ([]byt
 // ============================================================================================================================
 // Write - write variable into chaincode state
 // ============================================================================================================================
-func (t *SimpleChaincode) Write(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+func (t *SimpleChaincode) Write(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var name, value string // Entities
 	var err error
 	fmt.Println("running write()")
@@ -216,7 +239,7 @@ func (t *SimpleChaincode) Write(stub *shim.ChaincodeStub, args []string) ([]byte
 // ============================================================================================================================
 // Init Marble - create a new marble, store into chaincode state
 // ============================================================================================================================
-func (t *SimpleChaincode) init_marble(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+func (t *SimpleChaincode) init_marble(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
 
 	//   0       1       2     3
@@ -272,9 +295,94 @@ func (t *SimpleChaincode) init_marble(stub *shim.ChaincodeStub, args []string) (
 }
 
 // ============================================================================================================================
+// Init Product - create a new product, store into chaincode state
+// ============================================================================================================================
+func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var err error
+
+	//   0       1       2     3
+	// "asdf", "blue", "35", "bob"
+
+	var argsLen = len(args)
+
+	if argsLen != 9 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 9")
+	}
+
+	//input sanitation
+	fmt.Println("- start init marble")
+	for i := 0; i < argsLen-1; i++ {
+		if len(args[i]) <= 0 {
+			return nil, errors.New("argument "+ strconv.Itoa(i) +" must be a non-empty string")
+		}
+	}
+
+
+	uid := args[0]
+	name := args[1]
+	desc := args[2]
+	status := args[3]
+	point := args[4]
+	route := args[5]
+	mfg_date := args[6]
+	mfg_loc := args[7]
+	qr_code := args[8]
+
+	//check if product already exists
+	productAsBytes, err := stub.GetState(name)
+	if err != nil {
+		return nil, errors.New("Failed to get product by name")
+	}
+	res := Product{}
+	json.Unmarshal(productAsBytes, &res)
+	if res.Name == name{
+		fmt.Println("This product arleady exists: " + name)
+		fmt.Println(res);
+		return nil, errors.New("This product already exists")				//all stop a product by this name exists
+	}
+	
+	//build the Product json string manually
+	str := 	`{`+
+			`"uid": "` + uid + `" , `+
+			`"name": "` + name + `" , `+
+			`"desc": "` + desc + `" , `+
+			`"status": "` + status + `" , `+ 
+			`"point": "` + point + `" , `+ 
+			`"route": "` + route + `" , `+ 
+			`"mfg_date": "` + mfg_date + `" , `+ 
+			`"mfg_loc": "` + mfg_loc + `" , `+ 
+			`"qr_code": "` + qr_code + `" `+ 
+			`}`
+
+
+	err = stub.PutState(name, []byte(str))									//store product with id as key
+	if err != nil {
+		return nil, err
+	}
+		
+	//get the marble index
+	productIndexAsBytes, err := stub.GetState(productIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get product index")
+	}
+	var productIndex []string
+	json.Unmarshal(productIndexAsBytes, &productIndex)							//un stringify it aka JSON.parse()
+	
+	//append
+	productIndex = append(productIndex, name)									//add product name to index list
+	fmt.Println("! product index: ", productIndex)
+	jsonAsBytes, _ := json.Marshal(productIndex)
+	err = stub.PutState(productIndexStr, jsonAsBytes)						//store name of product
+
+	fmt.Println("- end init product")
+	return nil, nil
+}
+
+
+// ============================================================================================================================
 // Set User Permission on Marble
 // ============================================================================================================================
-func (t *SimpleChaincode) set_user(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+func (t *SimpleChaincode) set_user(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
 	
 	//   0       1
