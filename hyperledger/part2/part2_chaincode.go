@@ -367,7 +367,7 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 	fmt.Println("- start init marble")
 	for i := 0; i < argsLen-1; i++ {
 		if len(args[i]) <= 0 {
-			return nil, errors.New("Argument "+ strconv.Itoa(i) +" must be a non-empty string")
+			return nil, errors.New("argument "+ strconv.Itoa(i) +" must be a non-empty string")
 		}
 	}
 
@@ -392,7 +392,7 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 	if res.Name == name{
 		fmt.Println("This product arleady exists: " + name)
 		fmt.Println(res);
-		return nil, errors.New("This product arleady exists")				//all stop a product by this name exists
+		return nil, errors.New("This product already exists")				//all stop a product by this name exists
 	}
 	
 	//build the Product json string manually
@@ -420,7 +420,7 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 		return nil, errors.New("Failed to get product index")
 	}
 	var productIndex []string
-	json.Unmarshal(marblesAsBytes, &productIndex)							//un stringify it aka JSON.parse()
+	json.Unmarshal(productAsBytes, &productIndex)							//un stringify it aka JSON.parse()
 	
 	//append
 	productIndex = append(productIndex, name)									//add product name to index list
