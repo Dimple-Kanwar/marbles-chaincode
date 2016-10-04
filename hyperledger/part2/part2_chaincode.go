@@ -415,12 +415,12 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 	}
 		
 	//get the marble index
-	productAsBytes, err := stub.GetState(productIndexStr)
+	productIndexAsBytes, err := stub.GetState(productIndexStr)
 	if err != nil {
 		return nil, errors.New("Failed to get product index")
 	}
 	var productIndex []string
-	json.Unmarshal(productAsBytes, &productIndex)							//un stringify it aka JSON.parse()
+	json.Unmarshal(productIndexAsBytes, &productIndex)							//un stringify it aka JSON.parse()
 	
 	//append
 	productIndex = append(productIndex, name)									//add product name to index list
