@@ -34,8 +34,12 @@ import (
 type SimpleChaincode struct {
 }
 
+
 var marbleIndexStr = "_marbleindex"				//name for the key/value that will store a list of all known marbles
 var openTradesStr = "_opentrades"				//name for the key/value that will store all open trades
+
+var productIndexStr = "_productindex"				//name for the key/value that will store a list of all known products
+
 
 type Marble struct{
 	Name string `json:"name"`					//the fieldtags are needed to keep case from bouncing around
@@ -59,6 +63,19 @@ type AnOpenTrade struct{
 type AllTrades struct{
 	OpenTrades []AnOpenTrade `json:"open_trades"`
 }
+
+type Product struct{
+	UID string `json:"uid"`
+	Name string `json:"name"`					//the fieldtags are needed to keep case from bouncing around
+	Description string `json:"desc"`
+	Status int `json:"status"`
+	Processing Point string `json:"point"`
+	Prescribed Route string `json:"route"`
+	Manufacture Date string `json:"mfg_date"`
+	Manufacture Location string `json:"mfg_loc"`
+	QR Code string `json:"qr_code"`
+}
+
 
 // ============================================================================================================================
 // Main
@@ -106,6 +123,13 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	if err != nil {
 		return nil, err
 	}
+
+	var emptyProduct []string
+	jsonAsBytes, _ := json.Marshal(emptyProduct)								//marshal an emtpy array of strings to clear the index
+	err = stub.PutState(productIndexStr, jsonAsBytes)
+	if err != nil {
+		return nil, err
+	}
 	
 	return nil, nil
 }
@@ -135,6 +159,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		return t.Write(stub, args)
 	} else if function == "init_marble" {									//create a new marble
 		return t.init_marble(stub, args)
+	} else if function == "init_product" {									//create a new product
+		return t.init_product(stub, args)
 	} else if function == "set_user" {										//change owner of a marble
 		res, err := t.set_user(stub, args)
 		cleanTrades(stub)													//lets make sure all open trades are still valid
@@ -320,6 +346,92 @@ func (t *SimpleChaincode) init_marble(stub shim.ChaincodeStubInterface, args []s
 	fmt.Println("- end init marble")
 	return nil, nil
 }
+
+
+// ============================================================================================================================
+// Init Product - create a new product, store into chaincode state
+// ============================================================================================================================
+func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var err error
+
+	//   0       1       2     3
+	// "asdf", "blue", "35", "bob"
+
+	var argsLen = len(args)
+
+	if argsLen != 9 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 9")
+	}
+
+	//input sanitation
+	fmt.Println("- start init marble")
+	for i := 0; i < argsLen-1; i++ {
+		if len(args[i]) <= 0 {
+			return nil, errors.New("Argument"+ i +" must be a non-empty string")
+		}
+	}
+
+
+	uid := args[0]
+	name := args[1]
+	desc := args[2]
+	status := args[3]
+	point := args[4]
+	route := args[5]
+	mfg_date := args[6]
+	mfg_loc := args[7]
+	qr_code := args[8]
+
+	//check if product already exists
+	productAsBytes, err := stub.GetState(name)
+	if err != nil {
+		return nil, errors.New("Failed to get product by name")
+	}
+	res := Product{}
+	json.Unmarshal(productAsBytes, &res)
+	if res.Name == name{
+		fmt.Println("This product arleady exists: " + name)
+		fmt.Println(res);
+		return nil, errors.New("This product arleady exists")				//all stop a product by this name exists
+	}
+	
+	//build the Product json string manually
+	str := 	`{`+
+			`"uid": "` + uid + `" , `+
+			`"name": "` + name + `" , `+
+			`"desc": "` + desc + `" , `+
+			`"status": "` + status + `" , `+ 
+			`"point": "` + point + `" , `+ 
+			`"route": "` + route + `" , `+ 
+			`"mfg_date": "` + mfg_date + `" , `+ 
+			`"mfg_loc": "` + mfg_loc + `" , `+ 
+			`"qr_code": "` + qr_code + `" `+ 
+			`}`
+
+
+	err = stub.PutState(name, []byte(str))									//store product with id as key
+	if err != nil {
+		return nil, err
+	}
+		
+	//get the marble index
+	productAsBytes, err := stub.GetState(productIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get product index")
+	}
+	var productIndex []string
+	json.Unmarshal(marblesAsBytes, &productIndex)							//un stringify it aka JSON.parse()
+	
+	//append
+	productIndex = append(productIndex, name)									//add product name to index list
+	fmt.Println("! product index: ", productIndex)
+	jsonAsBytes, _ := json.Marshal(productIndex)
+	err = stub.PutState(productIndexStr, jsonAsBytes)						//store name of product
+
+	fmt.Println("- end init product")
+	return nil, nil
+}
+
 
 // ============================================================================================================================
 // Set User Permission on Marble
