@@ -69,11 +69,11 @@ type Product struct{
 	Name string `json:"name"`					//the fieldtags are needed to keep case from bouncing around
 	Description string `json:"desc"`
 	Status int `json:"status"`
-	Processing Point string `json:"point"`
-	Prescribed Route string `json:"route"`
-	Manufacture Date string `json:"mfg_date"`
-	Manufacture Location string `json:"mfg_loc"`
-	QR Code string `json:"qr_code"`
+	Point string `json:"point"`
+	Route string `json:"route"`
+	Manufacture_Date string `json:"mfg_date"`
+	Manufacture_Location string `json:"mfg_loc"`
+	QR_Code string `json:"qr_code"`
 }
 
 
