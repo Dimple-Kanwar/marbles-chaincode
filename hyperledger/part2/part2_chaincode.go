@@ -125,8 +125,8 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	}
 
 	var emptyProduct []string
-	jsonAsBytes, _ := json.Marshal(emptyProduct)								//marshal an emtpy array of strings to clear the index
-	err = stub.PutState(productIndexStr, jsonAsBytes)
+	productJsonAsBytes, _ := json.Marshal(emptyProduct)								//marshal an emtpy array of strings to clear the index
+	err = stub.PutState(productIndexStr, productJsonAsBytes)
 	if err != nil {
 		return nil, err
 	}
