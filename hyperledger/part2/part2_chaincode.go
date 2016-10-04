@@ -367,7 +367,7 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 	fmt.Println("- start init marble")
 	for i := 0; i < argsLen-1; i++ {
 		if len(args[i]) <= 0 {
-			return nil, errors.New("Argument"+ i +" must be a non-empty string")
+			return nil, errors.New("Argument "+ strconv.Itoa(i) +" must be a non-empty string")
 		}
 	}
 
