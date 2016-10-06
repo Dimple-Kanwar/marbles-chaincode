@@ -149,7 +149,10 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	// Handle different functions
 	if function == "read" {													//read a variable
 		return t.read(stub, args)
+	} else if function == "read" {													//read a variable
+		return t.search_product(stub, args)
 	}
+
 	fmt.Println("query did not find func: " + function)						//error
 
 	return nil, errors.New("Received unknown function query")
@@ -211,7 +214,7 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 	for i,val := range productIndex{
 		fmt.Println(strconv.Itoa(i) + " - looking at " + val )
 	}
-	return valAsbytes, nil													//send it onward
+	return productsAsBytes, nil													//send it onward
 }
 
 
