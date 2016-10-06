@@ -220,14 +220,14 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 
 	var prod_args []string
 	var productJson []string
-	var readerr error
+//	var readerr error
 	var errResp string
 
 	for i,val := range productIndex{
 		fmt.Println(strconv.Itoa(i) + " - looking at " + val )
 
-		prodAsBytes, readerr := stub.GetState(val)
-		if readerr != nil {
+		prodAsBytes, err := stub.GetState(val)
+		if err != nil {
 			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
 			return nil, errors.New(errResp)
 		}
