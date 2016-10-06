@@ -227,7 +227,7 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 		prod_args[0] = val
 		prodAsBytes, readerr = t.read(stub, prod_args)
 		
-		json.Unmarshal(productsAsBytes, &productJson)
+		json.Unmarshal(prodAsBytes, &productJson)
 		fmt.Println("************* individual product" )
 		fmt.Println(productJson)		
 										//un stringify it aka JSON.parse()		
