@@ -149,7 +149,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	// Handle different functions
 	if function == "read" {													//read a variable
 		return t.read(stub, args)
-	} else if function == "read" {													//read a variable
+	} else if function == "search_product" {													//read a variable
 		return t.search_product(stub, args)
 	}
 
