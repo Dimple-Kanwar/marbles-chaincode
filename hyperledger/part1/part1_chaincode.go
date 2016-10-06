@@ -212,10 +212,6 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 	fmt.Println("************* PRODUCT BYTES" )
 	fmt.Println(productsAsBytes)
 
-	for _, elem := range productsAsBytes {
-		fmt.Println("--------- product qr code "+ elem.qr_code)
-	}
-
 	var productIndex []string
 	json.Unmarshal(productsAsBytes, &productIndex)								//un stringify it aka JSON.parse()
 
