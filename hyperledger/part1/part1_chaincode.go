@@ -226,6 +226,10 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 		fmt.Println(strconv.Itoa(i) + " - looking at " + val )
 
 		prodAsBytes, readerr := stub.GetState(val)
+		if readerr != nil {
+			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
+			return nil, errors.New(errResp)
+		}
 		
 		json.Unmarshal(prodAsBytes, &productJson)
 		fmt.Println("************* individual product" )
