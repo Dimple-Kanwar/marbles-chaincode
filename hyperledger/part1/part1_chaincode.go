@@ -218,8 +218,18 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 	fmt.Println("unmarshalled product json" )
 	fmt.Println(productIndex)
 
+	var prod_args []string
+	var productJson []string
+
 	for i,val := range productIndex{
 		fmt.Println(strconv.Itoa(i) + " - looking at " + val )
+		prod_args[0] = val
+		prodAsBytes = t.read(stub, prod_args)
+		
+		json.Unmarshal(productsAsBytes, &productJson)
+		fmt.Println("************* individual product" )
+		fmt.Println(productJson)		
+										//un stringify it aka JSON.parse()		
 	}
 	return productsAsBytes, nil													//send it onward
 }
