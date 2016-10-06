@@ -193,7 +193,7 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 		return nil, errors.New("Incorrect number of arguments. Expecting name of the var to query")
 	}
 
-	var name = args[0]
+	name = args[0]
 	var searchKey = args[1]
 	var searchVal = args[2]
 
