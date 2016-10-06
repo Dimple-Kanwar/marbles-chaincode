@@ -221,6 +221,7 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 	var prod_args []string
 	var productJson []string
 	var readerr error
+	var errResp string
 
 	for i,val := range productIndex{
 		fmt.Println(strconv.Itoa(i) + " - looking at " + val )
