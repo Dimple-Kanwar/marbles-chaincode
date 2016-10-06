@@ -218,7 +218,7 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 	fmt.Println("unmarshalled product json" )
 	fmt.Println(productIndex)
 
-	var prod_args []string
+
 	var productJson []string
 //	var readerr error
 	var errResp string
