@@ -291,7 +291,8 @@ func (t *SimpleChaincode) init_marble(stub shim.ChaincodeStubInterface, args []s
 	var marbleIndex []string
 	json.Unmarshal(marblesAsBytes, &marbleIndex)							//un stringify it aka JSON.parse()
 
-	fmt.Println("marbleIndex before append "+ marbleIndex)
+	fmt.Println("marbleIndex before append ")
+	fmt.Println(marbleIndex)
 	
 	//append
 	marbleIndex = append(marbleIndex, args[0])								//add marble name to index list
