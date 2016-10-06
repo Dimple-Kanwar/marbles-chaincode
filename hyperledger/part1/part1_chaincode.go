@@ -224,8 +224,8 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 
 	for i,val := range productIndex{
 		fmt.Println(strconv.Itoa(i) + " - looking at " + val )
-		prod_args[0] = val
-		prodAsBytes, readerr = t.read(stub, prod_args)
+
+		prodAsBytes, readerr := stub.GetState(val)
 		
 		json.Unmarshal(prodAsBytes, &productJson)
 		fmt.Println("************* individual product" )
