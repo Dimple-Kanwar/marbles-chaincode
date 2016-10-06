@@ -179,6 +179,41 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 	return valAsbytes, nil													//send it onward
 }
 
+// ============================================================================================================================
+// Read - read a variable from chaincode state
+// ============================================================================================================================
+func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var name, jsonResp string
+	var err error
+
+	if len(args) != 3 {
+		return nil, errors.New("Incorrect number of arguments. Expecting name of the var to query")
+	}
+
+	var name = args[0]
+	var searchKey = args[1]
+	var searchVal = args[2]
+
+
+	fmt.Println("in search -- name = "+ name)
+	fmt.Println("in search -- key = "+ searchKey)
+	fmt.Println("in search -- val = "+ searchVal)
+
+	productsAsBytes, err := stub.GetState(name)									//get the var from chaincode state
+	if err != nil {
+		jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	var productIndex []string
+	json.Unmarshal(productsAsBytes, &productIndex)								//un stringify it aka JSON.parse()
+
+	for i,val := range productIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val )
+	}
+	return valAsbytes, nil													//send it onward
+}
+
 
 // ============================================================================================================================
 // Delete - remove a key/value pair from state
