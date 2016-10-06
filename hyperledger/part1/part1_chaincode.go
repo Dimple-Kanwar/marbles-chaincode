@@ -202,6 +202,7 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 	fmt.Println("in search -- key = "+ searchKey)
 	fmt.Println("in search -- val = "+ searchVal)
 
+
 	productsAsBytes, err := stub.GetState(name)									//get the var from chaincode state
 	if err != nil {
 		jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
@@ -210,6 +211,9 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 
 	var productIndex []string
 	json.Unmarshal(productsAsBytes, &productIndex)								//un stringify it aka JSON.parse()
+
+	fmt.Println("unmarshalled product json" )
+	fmt.Println(productIndex)
 
 	for i,val := range productIndex{
 		fmt.Println(strconv.Itoa(i) + " - looking at " + val )
