@@ -167,6 +167,9 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 	}
 
 	name = args[0]
+
+	fmt.Println("in read -- name = "+ name)
+
 	valAsbytes, err := stub.GetState(name)									//get the var from chaincode state
 	if err != nil {
 		jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
@@ -175,6 +178,7 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 
 	return valAsbytes, nil													//send it onward
 }
+
 
 // ============================================================================================================================
 // Delete - remove a key/value pair from state
@@ -229,6 +233,9 @@ func (t *SimpleChaincode) Write(stub shim.ChaincodeStubInterface, args []string)
 
 	name = args[0]															//rename for funsies
 	value = args[1]
+
+	fmt.Println("in Write - name = "+ name + " value = "+ value)
+
 	err = stub.PutState(name, []byte(value))								//write the variable into the chaincode state
 	if err != nil {
 		return nil, err
@@ -283,6 +290,8 @@ func (t *SimpleChaincode) init_marble(stub shim.ChaincodeStubInterface, args []s
 	}
 	var marbleIndex []string
 	json.Unmarshal(marblesAsBytes, &marbleIndex)							//un stringify it aka JSON.parse()
+
+	fmt.Println("marbleIndex before append "+ marbleIndex)
 	
 	//append
 	marbleIndex = append(marbleIndex, args[0])								//add marble name to index list
