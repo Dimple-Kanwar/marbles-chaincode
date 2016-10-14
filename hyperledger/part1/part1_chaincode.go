@@ -381,7 +381,7 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 	}
 
 	//input sanitation
-	fmt.Println("- start init marble")
+	fmt.Println("- start init product")
 	for i := 0; i < argsLen-1; i++ {
 		if len(args[i]) <= 0 {
 			return nil, errors.New("argument "+ strconv.Itoa(i) +" must be a non-empty string")
@@ -400,14 +400,14 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 	qr_code := args[8]
 
 	//check if product already exists
-	productAsBytes, err := stub.GetState(name)
+	productAsBytes, err := stub.GetState(qr_code)
 	if err != nil {
 		return nil, errors.New("Failed to get product by name")
 	}
 	res := Product{}
 	json.Unmarshal(productAsBytes, &res)
-	if res.Name == name{
-		fmt.Println("This product arleady exists: " + name)
+	if res.Name == qr_code {
+		fmt.Println("This product arleady exists with qr_code: " + qr_code)
 		fmt.Println(res);
 		return nil, errors.New("This product already exists")				//all stop a product by this name exists
 	}
@@ -426,7 +426,7 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 			`}`
 
 
-	err = stub.PutState(name, []byte(str))									//store product with id as key
+	err = stub.PutState(qr_code, []byte(str))									//store product with id as key
 	if err != nil {
 		return nil, err
 	}
@@ -440,10 +440,10 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 	json.Unmarshal(productIndexAsBytes, &productIndex)							//un stringify it aka JSON.parse()
 	
 	//append
-	productIndex = append(productIndex, name)									//add product name to index list
+	productIndex = append(productIndex, qr_code)									//add product qr_code to index list
 	fmt.Println("! product index: ", productIndex)
 	jsonAsBytes, _ := json.Marshal(productIndex)
-	err = stub.PutState(productIndexStr, jsonAsBytes)						//store name of product
+	err = stub.PutState(productIndexStr, jsonAsBytes)						//store qr_code of product
 
 	fmt.Println("- end init product")
 	return nil, nil
