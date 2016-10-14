@@ -151,7 +151,10 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		return t.read(stub, args)
 	} else if function == "search_product" {													//read a variable
 		return t.search_product(stub, args)
+	} else if function == "get_range" {													//read a variable
+		return t.get_range(stub, args)
 	}
+
 
 	fmt.Println("query did not find func: " + function)						//error
 
@@ -240,6 +243,41 @@ func (t *SimpleChaincode) search_product (stub shim.ChaincodeStubInterface, args
 	return productsAsBytes, nil													//send it onward
 }
 
+
+// ============================================================================================================================
+// Read Query state - read a variable from chaincode state
+// ============================================================================================================================
+func (t *SimpleChaincode) get_range (stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var startkey = ""
+	var endkey = ""	
+
+	if len(args) >= 2 {
+		startkey = args[0]
+		endkey = args[1]
+	} 
+
+		keysIter, err := stub.RangeQueryState(startkey, endkey)
+		if err != nil {
+			return nil, fmt.Errorf("keys operation failed. Error accessing state: %s", err)
+		}
+		defer keysIter.Close()
+
+		var keys []string
+		for keysIter.HasNext() {
+			key, _, iterErr := keysIter.Next()
+			if iterErr != nil {
+				return nil, fmt.Errorf("keys operation failed. Error accessing state: %s", err)
+			}
+			keys = append(keys, key)
+		}
+
+		jsonKeys, err := json.Marshal(keys)
+		if err != nil {
+			return nil, fmt.Errorf("keys operation failed. Error marshaling JSON: %s", err)
+		}
+
+		return jsonKeys, nil	
+}
 
 // ============================================================================================================================
 // Delete - remove a key/value pair from state
