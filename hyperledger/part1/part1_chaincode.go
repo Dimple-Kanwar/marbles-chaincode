@@ -522,7 +522,7 @@ func (t *SimpleChaincode) save_txn (stub shim.ChaincodeStubInterface, args []str
 
 	txnArray = []string (txnAsBytes) 
 	
-	txnArray := append(txnArray, uuid)
+	txnArray = append(txnArray, uuid)
 
 	err = stub.PutState(txnkey, []byte (txnArray))									//store product with id as key
 	if err != nil {
