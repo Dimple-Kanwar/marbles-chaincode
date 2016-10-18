@@ -518,7 +518,7 @@ func (t *SimpleChaincode) save_txn (stub shim.ChaincodeStubInterface, args []str
 
 	txnAsBytes, err := stub.GetState(txnkey)
 
-	txnArray := string [] (txnAsBytes) 
+	var txnArray = string [] (txnAsBytes) 
 	
 	txnArray.append(uuid)
 
