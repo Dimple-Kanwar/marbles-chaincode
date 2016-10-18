@@ -38,6 +38,8 @@ var openTradesStr = "_opentrades"				//name for the key/value that will store al
 
 var productIndexStr = "_productindex"				//name for the key/value that will store a list of all known products
 
+
+
 type Marble struct{
 	Name string `json:"name"`					//the fieldtags are needed to keep case from bouncing around
 	Color string `json:"color"`
@@ -56,6 +58,11 @@ type Product struct{
 	Manufacture_Location string `json:"mfg_loc"`
 	QR_Code string `json:"qr_code"`
 }
+
+type Transaction struct{
+	UUID [] string `json:"uuid"`
+}
+
 
 // ============================================================================================================================
 // Main
@@ -134,7 +141,10 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		return t.init_product(stub, args)
 	} else if function == "set_user" {										//change owner of a marble
 		return t.set_user(stub, args)
+	} else if function == "save_txn" {										//change owner of a marble
+		return t.save_txn(stub, args)
 	}
+
 	fmt.Println("invoke did not find func: " + function)					//error
 
 	return nil, errors.New("Received unknown function invocation")
@@ -486,6 +496,41 @@ func (t *SimpleChaincode) init_product(stub shim.ChaincodeStubInterface, args []
 	fmt.Println("- end init product")
 	return nil, nil
 }
+
+// ============================================================================================================================
+// save txn - save the txn UUID for each product
+// ============================================================================================================================
+func (t *SimpleChaincode) save_txn (stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var err error
+
+	//   0       1       2     3
+	// "asdf", "blue", "35", "bob"
+
+	var argsLen = len(args)
+
+	if argsLen != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 9")
+	}
+
+	qr_code := args[0]
+	uuid := args[1]
+	txnkey := qr_code + "_txn"
+
+	txnAsBytes, err := stub.GetState(txnkey)
+
+	txnArray := string [] (txnAsBytes) 
+	
+	txnArray.append(uuid)
+
+	err = stub.PutState(txnkey, []byte (txnArray))									//store product with id as key
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("- end save txn")
+	return nil, nil
+}
+
 
 
 // ============================================================================================================================
