@@ -62,7 +62,7 @@ type Product struct{
 }
 
 type Transaction struct{
-	UUID [] string `json:"uuid"`
+	UUID []string `json:"uuid"`
 }
 
 
@@ -518,16 +518,26 @@ func (t *SimpleChaincode) save_txn (stub shim.ChaincodeStubInterface, args []str
 	uuid := args[1]
 	txnkey := qr_code + "_txn"
 
-	uuidArray := []string{uuid}
+	txnAsBytes, err := stub.GetState(txnkey)
+
+	var txnArray []string
+	json.Unmarshal(txnAsBytes, &txnArray)							//un stringify it aka JSON.parse()
+	
+	//append
+	txnArray = append(txnArray, uuid)									//add product qr_code to index list
+	jsonAsBytes, _ := json.Marshal(txnArray)
+	err = stub.PutState(txnkey, jsonAsBytes)						//store qr_code of product
+
+
+/*	uuidArray := []string{uuid}
 	buffer := &bytes.Buffer{}
 	gob.NewEncoder(buffer).Encode(uuidArray)
 	uuidBytes := buffer.Bytes()
+*/
 
-	txnAsBytes, err := stub.GetState(txnkey)
+//	txnAsBytes = append(txnAsBytes, uuidBytes...)
 
-	txnAsBytes = append(txnAsBytes, uuidBytes...)
-
-	err = stub.PutState(txnkey, txnAsBytes)									//store product with id as key
+//	err = stub.PutState(txnkey, txnAsBytes)									//store product with id as key
 	if err != nil {
 		return nil, err
 	}
