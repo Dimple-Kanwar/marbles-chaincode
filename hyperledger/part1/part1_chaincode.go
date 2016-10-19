@@ -25,8 +25,8 @@ import (
 	"strconv"
 	"encoding/json"
 	"strings"
-	"bytes"
- 	"encoding/gob"	
+//	"bytes"
+// 	"encoding/gob"	
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
