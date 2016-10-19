@@ -25,6 +25,8 @@ import (
 	"strconv"
 	"encoding/json"
 	"strings"
+	"bytes"
+ 	"encoding/gob"	
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -517,8 +519,13 @@ func (t *SimpleChaincode) save_txn (stub shim.ChaincodeStubInterface, args []str
 	txnkey := qr_code + "_txn"
 
 	txnAsBytes, err := stub.GetState(txnkey)
-	
-	txnAsBytes = append(txnAsBytes, uuid...)
+
+	uuidArray := []string{uuid}
+	buffer := &bytes.Buffer{}
+	gob.NewEncoder(buffer).Encode(uuidArray)
+	uuidBytes := buffer.Bytes()
+
+	txnAsBytes = append(txnAsBytes, uuidBytes)
 
 	err = stub.PutState(txnkey, txnAsBytes)									//store product with id as key
 	if err != nil {
